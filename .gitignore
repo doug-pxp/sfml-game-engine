@@ -1,0 +1,29 @@
+# Ignore build outputs
+build/
+out/
+bin/
+lib/
+
+# VS Code settings (optional, some people commit this folder — your choice)
+.vscode/
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Windows OS junk
+Thumbs.db
+Desktop.ini
+
+# VS temporary project files
+*.user
+*.vcxproj
+*.vcxproj.filters
+
+# Backup or temp files
+*.log
+*.tmp
+*.bak
+*.old
