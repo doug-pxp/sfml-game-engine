@@ -5,6 +5,9 @@
 
 int main() {
 
+	const int SCREEN_WIDTH = 1600;
+	const int SCREEN_HEIGHT = 1200;
+
 	std::cout << "Welcome To SFML for beginners" << std::endl;
 
 	// ------------------------------------------------------------
@@ -13,8 +16,8 @@ int main() {
 	// Create an 800x600 window (read these values from the config file)
 	// Set a frame rate limit to avoid excessive CPU usage
 
-	sf::RenderWindow window(sf::VideoMode({ 1600, 1200 }), "Game window");
-	window.setFramerateLimit(30);
+	sf::RenderWindow window(sf::VideoMode({ SCREEN_WIDTH, SCREEN_HEIGHT }), "Game window");
+	window.setFramerateLimit(60);
 
 	// ------------------------------------------------------------
 	// TODO: Load Configuration File
@@ -97,7 +100,7 @@ int main() {
 	//       * If top < 0 → reverse ySpeed
 	//       * If bottom > windowHeight → reverse ySpeed
 	// Make sure detection uses the shape's top-left coordinate plus width/height
-
+	sf::Vector2f velocity = {500.f, 500.f};
 
 	// ------------------------------------------------------------
 	// TODO: Drawing
@@ -116,10 +119,12 @@ int main() {
 	//   - Process events (close window, escape key, etc.)
 	//   - Update movement & bouncing
 	//   - Draw everything
+	sf::Clock clock;
 	
 	// run the program as long as the window is open
 		while (window.isOpen())
 		{
+			float dt = clock.restart().asSeconds();
 			// check all the window's events that were triggered since the last iteration of the loop
 			while (const std::optional event = window.pollEvent())
 			{
@@ -132,8 +137,23 @@ int main() {
 			window.clear(sf::Color::Black);
 
 			// draw everything here...
-			// window.draw(...);
+			// window.draw(...)
+			float left = rectangle.getPosition().x;
+			float right = rectangle.getPosition().x + rectangle.getSize().x;
+			float up = rectangle.getPosition().y;
+			float down = rectangle.getPosition().y + rectangle.getSize().y;
+
+			if (left < 0 || right > SCREEN_WIDTH){
+				velocity.x = velocity.x * -1;
+			}
+
+			if (up < 0 || down > SCREEN_HEIGHT){
+				velocity.y = velocity.y * -1;
+			}
+
+			rectangle.move(velocity * dt);
 			window.draw(rectangle);
+
 
 			// end the current frame
 			window.display();
