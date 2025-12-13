@@ -74,11 +74,18 @@ int main() {
 	// Load the font file provided in the config
 	// Create an sf::Text object for each shape's name
 	// Set its font, size, and color (from config file)
-	sf::Font font;
-	if (!font.loadFromFile("arial.ttf")) {
-    std::cout << "Failed to load font\n";
+	sf::Font font("arial.ttf");
+	if (!font.openFromFile("arial.ttf")) {
+		std::cout << "Failed to load font!" << std::endl;
+		return -1;
 	}
-
+	sf::Text rectangleText(font, "My Rectangle", 14);
+	rectangleText.setFillColor(sf::Color::White);
+	// Set position later after centering	
+	sf::FloatRect bounds = rectangleText.getLocalBounds();
+	rectangleText.setOrigin(
+    {bounds.position.x + bounds.size.x  / 2.f,
+    bounds.position.y  + bounds.size.y / 2.f});
 
 	// ------------------------------------------------------------
 	// TODO: Center Shape Name Text
@@ -104,7 +111,7 @@ int main() {
 	//       * If top < 0 → reverse ySpeed
 	//       * If bottom > windowHeight → reverse ySpeed
 	// Make sure detection uses the shape's top-left coordinate plus width/height
-	sf::Vector2f velocity = {500.f, 500.f};
+	sf::Vector2f velocity = {50.f, 50.f};
 
 	// ------------------------------------------------------------
 	// TODO: Drawing
@@ -137,11 +144,11 @@ int main() {
 					window.close();
 			}
 
-			// clear the window with black color
+			// [clear] the window with black color
 			window.clear(sf::Color::Black);
 
-			// draw everything here...
-			// window.draw(...)
+
+			// [update] the window
 			float left = rectangle.getPosition().x;
 			float right = rectangle.getPosition().x + rectangle.getSize().x;
 			float up = rectangle.getPosition().y;
@@ -156,10 +163,16 @@ int main() {
 			}
 
 			rectangle.move(velocity * dt);
+			rectangleText.setPosition(
+			{rectangle.getPosition().x + rectangle.getSize().x / 2,
+			rectangle.getPosition().y + rectangle.getSize().y / 2});
+			
+			// [draw] everything here...
 			window.draw(rectangle);
+			window.draw(rectangleText);
 
 
-			// end the current frame
+			// [	display] and end the current frame
 			window.display();
 		}
 
