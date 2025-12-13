@@ -74,6 +74,10 @@ int main() {
 	// Load the font file provided in the config
 	// Create an sf::Text object for each shape's name
 	// Set its font, size, and color (from config file)
+	sf::Font font;
+	if (!font.loadFromFile("arial.ttf")) {
+    std::cout << "Failed to load font\n";
+	}
 
 
 	// ------------------------------------------------------------
