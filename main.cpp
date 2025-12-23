@@ -5,20 +5,6 @@
 
 int main() {
 
-	const int SCREEN_WIDTH = 1600;
-	const int SCREEN_HEIGHT = 1200;
-
-	std::cout << "Welcome To SFML for beginners" << std::endl;
-
-	// ------------------------------------------------------------
-	// TODO: Initialize SFML Window
-	// ------------------------------------------------------------
-	// Create an 800x600 window (read these values from the config file)
-	// Set a frame rate limit to avoid excessive CPU usage
-
-	sf::RenderWindow window(sf::VideoMode({ SCREEN_WIDTH, SCREEN_HEIGHT }), "Game window");
-	window.setFramerateLimit(60);
-
 	// ------------------------------------------------------------
 	// TODO: Load Configuration File
 	// ------------------------------------------------------------
@@ -35,19 +21,90 @@ int main() {
 	//        Circle → radius
 	//        Rectangle → width, height
 	// Store all shapes in a vector of objects (base class recommended)
-	std::string line;
+unsigned int windowWidth = 0;
+unsigned int windowHeight = 0;
 
-	std::ifstream configFile("config.txt");
+std::string type;
 
-	if (configFile.is_open()) {
-		while (std::getline(configFile, line)) {
-			std::cout << line << std::endl;
-		}
-		configFile.close();
-	}
-	else {
-		std::cout << "Unable to open config.txt file." << std::endl;
-	}
+std::ifstream configFile("config.txt");
+if (!configFile) {
+    std::cout << "Unable to open config.txt file.\n";
+     return -1;
+}
+
+while (configFile >> type)   // reads the first token of each “line”
+{
+    if (type == "Window")
+    {
+        
+        configFile >> windowWidth >> windowHeight;
+
+        std::cout << "Window: " << windowWidth << " " << windowHeight << "\n";
+        // later: create your sf::RenderWindow here
+    }
+    else if (type == "Font")
+    {
+        std::string fontPath;
+        int fontSize;
+        int r, g, b;
+
+        configFile >> fontPath >> fontSize >> r >> g >> b;
+
+        std::cout << "Font: " << fontPath << " " << fontSize
+                  << " " << r << " " << g << " " << b << "\n";
+        // later: font.loadFromFile(fontPath), set default text color, etc.
+    }
+    else if (type == "Rectangle")
+    {
+        // Rectangle N X Y SX SY R G B W H
+        std::string name;
+        float x, y, sx, sy;
+        int r, g, b;
+        float width, height;
+
+        configFile >> name >> x >> y >> sx >> sy >> r >> g >> b >> width >> height;
+
+        std::cout << "Rectangle: " << name
+                  << " pos(" << x << "," << y << ")"
+                  << " vel(" << sx << "," << sy << ")"
+                  << " color(" << r << "," << g << "," << b << ")"
+                  << " size(" << width << "," << height << ")\n";
+
+        // later: create sf::RectangleShape, store velocity, etc.
+    }
+    else if (type == "Circle")
+    {
+        // Circle N X Y SX SY R G B RADIUS
+        std::string name;
+        float x, y, sx, sy;
+        int r, g, b;
+        float radius;
+
+        configFile >> name >> x >> y >> sx >> sy >> r >> g >> b >> radius;
+
+        std::cout << "Circle: " << name
+                  << " pos(" << x << "," << y << ")"
+                  << " vel(" << sx << "," << sy << ")"
+                  << " color(" << r << "," << g << "," << b << ")"
+                  << " radius(" << radius << ")\n";
+
+        // later: create sf::CircleShape, store velocity, etc.
+    }
+    else
+    {
+        std::cout << "Unknown keyword in config: " << type << "\n";
+        // optional: break; or keep going
+    }
+}
+	// ------------------------------------------------------------
+	// TODO: Initialize SFML Window
+	// ------------------------------------------------------------
+	// Create an 800x600 window (read these values from the config file)
+	// Set a frame rate limit to avoid excessive CPU usage
+	std::cout << "Window dimensions: " << windowWidth << "x" << windowHeight << std::endl;
+	
+	sf::RenderWindow window(sf::VideoMode({windowWidth, windowHeight}), "Game window");
+	window.setFramerateLimit(60);
 
 	// ------------------------------------------------------------
 	// TODO: Create Shape Objects
@@ -74,13 +131,11 @@ int main() {
 	// Load the font file provided in the config
 	// Create an sf::Text object for each shape's name
 	// Set its font, size, and color (from config file)
-	sf::Font font("arial.ttf");
-	if (!font.openFromFile("arial.ttf")) {
-		std::cout << "Failed to load font!" << std::endl;
-		return -1;
-	}
+	sf::Font font("fonts/arial.ttf");
 	sf::Text rectangleText(font, "My Rectangle", 14);
+	
 	rectangleText.setFillColor(sf::Color::White);
+
 	// Set position later after centering	
 	sf::FloatRect bounds = rectangleText.getLocalBounds();
 	rectangleText.setOrigin(
@@ -144,21 +199,31 @@ int main() {
 					window.close();
 			}
 
-			// [clear] the window with black color
-			window.clear(sf::Color::Black);
-
-
 			// [update] the window
 			float left = rectangle.getPosition().x;
 			float right = rectangle.getPosition().x + rectangle.getSize().x;
 			float up = rectangle.getPosition().y;
 			float down = rectangle.getPosition().y + rectangle.getSize().y;
 
-			if (left < 0 || right > SCREEN_WIDTH){
+			if (left < 0 ){
+				rectangle.setPosition({0.f, rectangle.getPosition().y});
 				velocity.x = velocity.x * -1;
 			}
 
-			if (up < 0 || down > SCREEN_HEIGHT){
+			if (right > windowWidth){
+				rectangle.setPosition({windowWidth - rectangle.getSize().x, rectangle.getPosition().y});
+				velocity.x = velocity.x * -1;
+			}
+
+			if (up < 0 ){
+				rectangle.setPosition({rectangle.getPosition().x, 0.f});
+				velocity.y = velocity.y * -1;
+			}
+
+			
+
+			if (down > windowHeight){
+				rectangle.setPosition({rectangle.getPosition().x, windowHeight - rectangle.getSize().y});
 				velocity.y = velocity.y * -1;
 			}
 
@@ -167,10 +232,12 @@ int main() {
 			{rectangle.getPosition().x + rectangle.getSize().x / 2,
 			rectangle.getPosition().y + rectangle.getSize().y / 2});
 			
+			// [clear] the window with black color
+			window.clear(sf::Color::Black);
+			
 			// [draw] everything here...
 			window.draw(rectangle);
 			window.draw(rectangleText);
-
 
 			// [	display] and end the current frame
 			window.display();
